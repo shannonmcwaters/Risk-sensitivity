@@ -5,7 +5,7 @@ library(data.table)
 library(lme4)
 
 #Import#
-RawData = read.csv("https://docs.google.com/spreadsheets/d/1vV-bsbYRfcZh1jYGqF9anCOINJNh-gNJblIEI_RvEQA/gviz/tq?tqx=out:csv")
+RawData = read.csv("https://raw.githubusercontent.com/shannonmcwaters/Risk-sensitivity/main/Risk%20sensitivity%20raw%20data%20.csv")
 
 #plots of proportion of visits to variable flowers against age and size#
 plot(RawData$PropRisky,RawData$DaysOld)
@@ -20,7 +20,7 @@ summary(ProportionModel)
 
 ## next step is to make the separated data ##
 
-Choice = strsplit(as.character(RawData$FSequence), split=",")
+Choices = strsplit(as.character(RawData$FSequence), split=",")
 ColonyID = rep(RawData$Colony, sapply(Choice, length))
 BeeID = rep(RawData$Individual, sapply(Choice, length))
 ColonyStage = rep(RawData$ReproductiveStage, sapply(Choice, length))
@@ -34,6 +34,8 @@ ChoiceNumber= as.numeric(unlist(strsplit(as.character(RawData$ChoiceNumber), spl
 
 #now unlist choice#
 Choice = unlist(Choice)
+Choice = ifelse(Choice[]=="S",1,0)
+
 #Create Separated data frame#
 
 RawDataNew = cbind.data.frame(ColonyID,BeeID,ColonyStage,Trip,ChoiceNumber,NectarValue,NumChoices,NumRisky,Age,Choice)
@@ -69,7 +71,7 @@ for(i in 1:length(BeeID)){
 #Logistic Regression for single choices#
 summary(glm(Size ~ Age))
 AgeSize2 = residuals(glm(Age ~ Size))
-SingleChoiceModel = glm(unlist(Choice) ~ AgeSize2 + RelativeRiskyValPerception + BeeID , data = RawDataNew, family= "binomial") #logistic regression
+SingleChoiceModel = glm(Choice ~ AgeSize2 + RelativeRiskyValPerception + BeeID , data = RawDataNew, family= "binomial") #logistic regression
 summary(SingleChoiceModel)
 
 ###########################################################################################################################################################
