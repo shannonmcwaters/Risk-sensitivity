@@ -3,18 +3,19 @@
 library(dplyr)
 library(data.table)
 library(lme4)
+library(ggplot2)
 
 #Import#
 RawData = read.csv("https://raw.githubusercontent.com/shannonmcwaters/Risk-sensitivity/main/Risk%20sensitivity%20raw%20data%20.csv")
-
+RawData = na.omit(RawData)
 #plots of proportion of visits to variable flowers against age and size#
 plot(RawData$PropRisky,RawData$DaysOld)
 plot(RawData$PropRisky,RawData$Size)
 
 #Linear Regression with proportion of choices for each trip for each bee#
-summary(glm(Size ~DaysOld, data=RawData))
-AgeSize=residuals(glm(Size~DaysOld,data=RawData))
-ProportionModel = glm(PropRisky~ AgeSize, data = RawData)
+summary(glm(Size ~ReproductiveStage, data=RawData))
+#AgeSize=residuals(glm(Size~DaysOld,data=RawData))
+ProportionModel = glm(PropRisky~ ReproductiveStage + Size, data = RawData)
 summary(ProportionModel)
 
 
@@ -74,4 +75,10 @@ AgeSize2 = residuals(glm(Age ~ Size))
 SingleChoiceModel = glm(Choice ~ AgeSize2 + RelativeRiskyValPerception + BeeID , data = RawDataNew, family= "binomial") #logistic regression
 summary(SingleChoiceModel)
 
+#plot size and stage
+plot = ggplot(RawData, aes(x=Size, y=PropRisky, color = ReproductiveStage)) +
+  geom_point() +
+  labs(x="Number of individuals in colony", y="Proportion risk-prone choices")+
+  scale_color_discrete(labels = c("Male & Gyne production", "Worker production"),
+                    name = "")
 ###########################################################################################################################################################
